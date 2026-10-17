@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>우리학급 1인 1역할 배정 도우미 🎒</title>
+    <meta name="description" content="초등학교 교실을 위한 귀엽고 산뜻한 1인 1역할 랜덤 배정 및 교실 게시판 부착용 A4 인쇄 도우미" />
+    <meta property="og:title" content="우리학급 1인 1역할 배정 도우미" />
+    <meta property="og:description" content="선생님과 학생 모두 즐거운 학급 1인 1역할 랜덤 뽑기 & A4 인쇄" />
+    <meta property="og:type" content="website" />
+
+    <!-- Google Fonts: Gaegu, Jua, Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome Icons for friendly school icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- Top Classroom Banner (Screen only) -->
+    <header class="app-header no-print">
+      <div class="header-container">
+        <div class="logo-group">
+          <span class="logo-emoji animate-bounce">🎈</span>
+          <div>
+            <div class="header-badge">초등 교실 맞춤형</div>
+            <h1 class="app-title">우리학급 1인 1역할 도우미</h1>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Class info inputs -->
+          <div class="class-info-box">
+            <span class="icon">🏫</span>
+            <input
+              type="text"
+              id="classTitleInput"
+              class="class-title-input"
+              value="3학년 2반"
+              placeholder="예: 3학년 2반"
+              aria-label="학급 명칭"
+            />
+          </div>
+
+          <!-- Google Sheets Action Buttons -->
+          <div class="sheets-action-group">
+            <button id="btnLoadSheet" class="btn btn-sheet-load" title="구글 스프레드시트 데이터 불러오기">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>🔄 시트 불러오기</span>
+            </button>
+            <button id="btnSaveSheet" class="btn btn-sheet-save" title="배정 결과를 구글 스프레드시트에 저장">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>💾 시트에 결과 저장</span>
+            </button>
+            <button id="btnOpenSheetSettings" class="btn btn-icon-only" title="스프레드시트 연동 설정">
+              <i class="fa-solid fa-gear"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+      <!-- Notice / Status Bar (Screen only) -->
+      <section class="banner-card no-print">
+        <div class="banner-text">
+          <span class="sparkle-icon">✨</span>
+          <p>
+            우리 반 모두가 주인공! <strong>[🎲 역할 배정하기]</strong>를 누르면 12명의 친구와 12개의 역할이 1:1로 골고루 연결돼요.
+          </p>
+        </div>
+        <div class="banner-quick-stats">
+          <span class="stat-pill">학생 <b id="studentCountBadge">12</b>명</span>
+          <span class="stat-pill">역할 <b id="roleCountBadge">12</b>개</span>
+        </div>
+      </section>
+
+      <!-- Action & Controls Bar (Screen only) -->
+      <div class="control-panel no-print">
+        <div class="action-buttons-row">
+          <!-- Primary Draw Button -->
+          <button id="btnAssign" class="btn btn-hero-draw">
+            <span class="dice-anim">🎲</span>
+            <span class="draw-text">역할 배정하기!</span>
+            <span class="btn-sub">두구두구 랜덤 뽑기</span>
+          </button>
+
+          <!-- Secondary Actions -->
+          <div class="secondary-actions">
+            <button id="btnPrint" class="btn btn-print">
+              <i class="fa-solid fa-print"></i>
+              <span>🖨️ 교실 게시판 A4 인쇄</span>
+            </button>
+            <button id="btnToggleManage" class="btn btn-manage">
+              <i class="fa-solid fa-user-pen"></i>
+              <span id="manageToggleText">📝 학생/역할 편집</span>
+            </button>
+            <button id="btnResetDefault" class="btn btn-ghost" title="기본 12명/12역할로 초기화">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>초기화</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Print View Options -->
+        <div class="view-options-row">
+          <div class="view-mode-selector">
+            <span class="label-text">보기 형식:</span>
+            <button class="mode-chip active" data-view="card">
+              <i class="fa-solid fa-table-cells-large"></i> 귀여운 카드형
+            </button>
+            <button class="mode-chip" data-view="table">
+              <i class="fa-solid fa-list-check"></i> 알림장 표형
+            </button>
+          </div>
+          <div class="last-assigned-info" id="lastAssignedInfo">
+            <i class="fa-regular fa-clock"></i> 아직 배정 전입니다. [역할 배정하기]를 눌러보세요!
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Management Panel (Screen only) -->
+      <section id="managePanel" class="manage-panel hidden no-print">
+        <div class="manage-header">
+          <h3><i class="fa-solid fa-sliders"></i> 학생 명단 & 역할 목록 관리</h3>
+          <span class="manage-tip">💡 한 줄에 한 명(또는 역할)씩 입력하세요. 변경 즉시 반영됩니다.</span>
+        </div>
+        <div class="manage-grid">
+          <!-- Students Edit Box -->
+          <div class="manage-card">
+            <div class="card-head">
+              <h4><i class="fa-solid fa-children"></i> 학생 명단 (<span id="editStudentCount">12</span>명)</h4>
+              <button id="btnShuffleStudents" class="btn-sm" title="학생 순서 섞기">순서 섞기</button>
+            </div>
+            <textarea
+              id="studentListInput"
+              rows="9"
+              placeholder="학생 이름을 한 줄에 하나씩 입력하세요."
+            ></textarea>
+          </div>
+
+          <!-- Roles Edit Box -->
+          <div class="manage-card">
+            <div class="card-head">
+              <h4><i class="fa-solid fa-clipboard-list"></i> 학급 역할 목록 (<span id="editRoleCount">12</span>개)</h4>
+              <button id="btnRestoreRoles" class="btn-sm" title="기본 추천 역할 채우기">추천 역할 채우기</button>
+            </div>
+            <textarea
+              id="roleListInput"
+              rows="9"
+              placeholder="역할 이름을 한 줄에 하나씩 입력하세요. (이모지 포함 가능)"
+            ></textarea>
+          </div>
+        </div>
+        <div class="manage-footer">
+          <button id="btnSaveEditedList" class="btn btn-save-edit">
+            <i class="fa-solid fa-check"></i> 편집 내용 적용하기
+          </button>
+        </div>
+      </section>
+
+      <!-- Shuffling Overlay Animation -->
+      <div id="shuffleOverlay" class="shuffle-overlay hidden no-print">
+        <div class="shuffle-modal">
+          <div class="spinning-dice">🎲</div>
+          <h2 class="shuffle-title">두구두구... 우리 반 역할 정하는 중!</h2>
+          <p class="shuffle-sub" id="shuffleQuote">누가 어떤 멋진 일을 맡게 될까요? 🌟</p>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Printable Document Header (Appears prominently in Print, nice on Screen) -->
+      <div class="print-doc-header">
+        <div class="print-emblem">🏫</div>
+        <div class="print-header-center">
+          <h2 class="print-school-title" id="printClassTitle">3학년 2반 1인 1역할 배정표</h2>
+          <p class="print-sub-info">
+            배정일: <span id="printDateText">2026년 10월 17일</span> | "서로 돕고 배려하는 행복한 우리 교실"
+          </p>
+        </div>
+        <div class="print-seal-box">
+          <div class="seal-circle">
+            <span>담임</span>
+            <span>확인</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS SECTION: Card Grid View -->
+      <section id="cardGridView" class="assignment-grid-view">
+        <div class="cards-grid" id="cardsGrid">
+          <!-- 12 Default Cards will be populated by script.js -->
+        </div>
+      </section>
+
+      <!-- RESULTS SECTION: Table View -->
+      <section id="tableView" class="assignment-table-view hidden">
+        <div class="table-responsive">
+          <table class="assignment-table">
+            <thead>
+              <tr>
+                <th style="width: 10%">번호</th>
+                <th style="width: 25%">학생 이름</th>
+                <th style="width: 35%">배정된 역할</th>
+                <th style="width: 30%">실천 다짐 & 확인</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Populated by script.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Printable Rules & Notes (Visible in Print & Screen) -->
+      <footer class="print-doc-footer">
+        <div class="rules-card">
+          <div class="rules-title">🌟 1인 1역할 행복 약속 3가지</div>
+          <ul class="rules-list">
+            <li><strong>1. 내 일은 스스로!</strong> 맡은 역할에 책임감을 갖고 매일 성실히 실천해요.</li>
+            <li><strong>2. 서로서로 돕기!</strong> 친구가 바쁘거나 도움이 필요할 때는 언제든 함께 도와요.</li>
+            <li><strong>3. 칭찬과 감사!</strong> 우리 반을 위해 애써주는 친구에게 고마운 마음을 전해요.</li>
+          </ul>
+        </div>
+        <div class="teacher-sign-row">
+          <span>발행: 우리학급 자치회</span>
+          <span>담임교사 서명: _______________ (인)</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Google Sheets Apps Script Setup Modal (Screen only) -->
+    <div id="sheetsModal" class="modal-backdrop hidden no-print">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-file-excel"></i> 구글 스프레드시트(Apps Script) 연동 안내</h3>
+          <button id="btnCloseModal" class="btn-close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="guide-lead">
+            다음 단계에서 구글 스프레드시트와 직접 동기화할 수 있도록 <strong>웹앱(Apps Script) 연동 URL</strong> 자리를 준비했습니다.
+          </p>
+
+          <div class="form-group">
+            <label for="appsScriptUrl">구글 Apps Script 웹앱 URL (Exec URL):</label>
+            <input
+              type="url"
+              id="appsScriptUrl"
+              placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+              class="modal-input"
+            />
+            <span class="input-hint">
+              배포 시 <em>[웹 앱으로 배포] -> [액세스 권한: 모든 사용자]</em>로 설정한 URL을 입력하세요.
+            </span>
+          </div>
+
+          <div class="guide-accordion">
+            <details>
+              <summary><strong>📋 초간단 Google Apps Script 예시 코드 보기</strong></summary>
+              <pre class="code-block"><code>function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  // 첫 열: 학생명, 둘째 열: 역할명
+  return ContentService.createTextOutput(JSON.stringify({data: data}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var params = JSON.parse(e.postData.contents);
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  sheet.clear();
+  sheet.appendRow(["번호", "학생 이름", "배정 역할", "배정일시"]);
+  params.results.forEach(function(item, idx) {
+    sheet.appendRow([idx + 1, item.student, item.role, params.date]);
+  });
+  return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</code></pre>
+            </details>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnSaveAppsScriptUrl" class="btn btn-save-modal">설정 저장</button>
+          <button id="btnCloseModalBtn" class="btn btn-ghost">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden no-print"></div>
+
+    <!-- Pure JavaScript Entry Point -->
+    <script src="./script.js"></script>
+  </body>
+</html>

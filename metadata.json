@@ -1,0 +1,6 @@
+{
+  "name": "우리학급 1인 1역할 도우미",
+  "description": "초등학교 교실을 위한 귀엽고 산뜻한 1인 1역할 랜덤 배정 및 A4 인쇄 도우미",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
